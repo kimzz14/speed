@@ -46,7 +46,7 @@ while True:
     totalSize = 0
     for cFile in cFile_LIST:
         diffSize = cFile_DICT[cFile] - bFile_DICT.get(cFile, 0)
-        totalSize = cFile_DICT[cFile]
+        totalSize += cFile_DICT[cFile]
         if diffSize == 0:
             continue
 
