@@ -43,16 +43,17 @@ while True:
 
     print("===============================================================")
     totalDiffSize = 0
+    totalSize = 0
     for cFile in cFile_LIST:
         diffSize = cFile_DICT[cFile] - bFile_DICT.get(cFile, 0)
-
+        totalSize = cFile_DICT[cFile]
         if diffSize == 0:
             continue
 
         totalDiffSize += diffSize
         speed = diffSize / (cTime - bTime)
-        
+
         print(('[{0}/s]  {1} {2}').format(get_fileFormat(speed), get_fileFormat(cFile_DICT[cFile]), cFile))
     print('')
     speed = totalDiffSize / (cTime - bTime)
-    print(('Total {0}/s').format(get_fileFormat(speed)))
+    print(('Total {0}/s      {1}').format(get_fileFormat(speed), get_fileFormat(totalSize)))
