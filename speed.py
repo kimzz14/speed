@@ -45,8 +45,13 @@ while True:
     totalDiffSize = 0
     for cFile in cFile_LIST:
         diffSize = cFile_DICT[cFile] - bFile_DICT.get(cFile, 0)
+
+        if diffSize == 0:
+            continue
+
         totalDiffSize += diffSize
         speed = diffSize / (cTime - bTime)
+        
         print(('[{0}/s]  {1} {2}').format(get_fileFormat(speed), get_fileFormat(cFile_DICT[cFile]), cFile))
     print('')
     speed = totalDiffSize / (cTime - bTime)
