@@ -1,21 +1,10 @@
 from optparse import OptionParser
 import os, time, sys
-import subprocess
+
 #option parser
 parser = OptionParser(usage="""Run annotation.py \n Usage: %prog [options]""")
 parser.add_option("-i","--interval",action = 'store',type = 'int',dest = 'INTERVAL',help = "")
-parser.add_option("-t","--target",action = 'store',type = 'string',dest = 'TARGET',help = "")
 (opt, args) = parser.parse_args()
-
-if opt.INTERVAL == None:
-    interval = 10
-else:
-    interval = opt.INTERVAL
-
-if opt.TARGET == None:
-    target = '*'
-else:
-    target = opt.TARGET
 
 def get_fileFormat(fiseSize):
     fiseSize = float(fiseSize)
@@ -30,33 +19,41 @@ def get_fileFormat(fiseSize):
         return "%8.2f GB" % (fiseSize/1024/1024/1024)
 
 def get_fileList(target):
-    command = f'du -bsc {target}'
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    stdout, stderr = process.communicate()
-
+    file_LIST = os.listdir(target)
     file_DICT = {}
-    file_LIST = []
-    for line in stdout.decode('utf-8').rstrip('\n').split('\n'):
-        size, file = line.split('\t')
-        file_LIST += [file]
-        file_DICT[file] = int(size)
+    for file in file_LIST:
+        file_DICT[file] = os.path.getsize(file)
 
     return file_DICT, file_LIST
 
+if opt.INTERVAL == None:
+    interval = 10
+else:
+    interval = opt.INTERVAL
+
+target = '.'
+
+bTime = time.time()
 bFile_DICT, bFile_LIST = get_fileList(target)
 
 while True:
     time.sleep(interval)
+    cTime = time.time()
     cFile_DICT, cFile_LIST = get_fileList(target)
 
     print("===============================================================")
+    totalDiffSize = 0
+    totalSize = 0
     for cFile in cFile_LIST:
         diffSize = cFile_DICT[cFile] - bFile_DICT.get(cFile, 0)
+        totalSize += cFile_DICT[cFile]
         if diffSize == 0:
             continue
 
-        speed = diffSize / (interval)
+        totalDiffSize += diffSize
+        speed = diffSize / (cTime - bTime)
 
         print(('[{0}/s]  {1} {2}').format(get_fileFormat(speed), get_fileFormat(cFile_DICT[cFile]), cFile))
     print('')
-    bFile_DICT, bFile_LIST = cFile_DICT, cFile_LIST
+    speed = totalDiffSize / (cTime - bTime)
+    print(('Total {0}/s      {1}').format(get_fileFormat(speed), get_fileFormat(totalSize)))
